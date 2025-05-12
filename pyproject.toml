@@ -29,7 +29,10 @@ classifiers = [
     "Topic :: Utilities",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = [
+    "requests>=2.32.3",
+    "typer>=0.15.3",
+]
 
 [project.urls]
 Homepage = "https://vandyG.github.io/eventbrite-cetd"
@@ -42,7 +45,7 @@ Gitter = "https://gitter.im/eventbrite-cetd/community"
 Funding = "https://github.com/sponsors/vandyG"
 
 [project.scripts]
-eventbrite-cetd = "eventbrite_cetd.cli:main"
+eventbrite-cetd = "eventbrite_cetd._internal.cli:app"
 
 [tool.pdm.version]
 source = "call"
