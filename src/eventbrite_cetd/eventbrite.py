@@ -19,15 +19,19 @@ async def fetch(session, url):
 async def get_my_organizations(session):
     url = f"{BASE_URL}/users/me/organizations/"
     organizations = []
-    has_more_items = True
-    page = 1
+    continuation = None
 
-    while has_more_items:
-        paginated_url = f"{url}?page={page}"
+    while True:
+        paginated_url = url
+        if continuation:
+            paginated_url += f"?continuation={continuation}"
+
         data = await fetch(session, paginated_url)
         organizations.extend(data["organizations"])
-        has_more_items = data["pagination"]["has_more_items"]
-        page += 1
+
+        continuation = data["pagination"].get("continuation")
+        if not continuation:
+            break
 
     return organizations
 
