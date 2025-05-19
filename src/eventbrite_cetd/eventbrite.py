@@ -38,19 +38,23 @@ async def get_my_organizations(session):
 
 async def fetch_attendees_page(session, url):
     data = await fetch(session, url)
-    return data.get("attendees", []), data["pagination"]["has_more_items"]
+    return data.get("attendees", []), data["pagination"].get("continuation")
 
 
 async def get_attendees_by_org(session, organization_id):
     attendees = []
-    page = 1
-    has_more_items = True
+    continuation = None
 
-    while has_more_items:
-        url = f"{BASE_URL}/organizations/{organization_id}/attendees/?expand=event&page={page}"
-        page_attendees, has_more_items = await fetch_attendees_page(session, url)
+    while True:
+        url = f"{BASE_URL}/organizations/{organization_id}/attendees/?expand=event"
+        if continuation:
+            url += f"&continuation={continuation}"
+
+        page_attendees, continuation = await fetch_attendees_page(session, url)
         attendees.extend(page_attendees)
-        page += 1
+
+        if not continuation:
+            break
 
     return attendees
 
