@@ -31,7 +31,8 @@ async def fetch(session: aiohttp.ClientSession, url: str) -> dict:
     Raises:
         aiohttp.ClientResponseError: If the HTTP request returns an unsuccessful status code.
     """
-    async with session.get(url, headers=HEADERS, timeout=10) as response:
+    timeout = aiohttp.ClientTimeout(total=10)
+    async with session.get(url, headers=HEADERS, timeout=timeout) as response:
         response.raise_for_status()
         return await response.json()
 
