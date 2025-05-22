@@ -28,7 +28,7 @@ jobs:
       - name: Install the project
         run: uv sync --no-dev
 
-      - name: Run tests
+      - name: Fetch Attendees.
         env:
           # Set the Eventbrite API token as an environment variable.
           # This assumes you have added a repository secret named 'EVENTBRITE_PRIVATE_TOKEN'.
