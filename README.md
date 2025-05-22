@@ -1,6 +1,6 @@
 # eventbrite-cetd
 
-[![ci](https://github.com/vandyG/eventbrite-cetd/workflows/ci/badge.svg)](https://github.com/vandyG/eventbrite-cetd/actions?query=workflow%3Aci)
+[![ci](https://github.com/vandyG/eventbrite/actions/workflows/ci.yml/badge.svg)](https://github.com/vandyG/eventbrite/actions/workflows/ci.yml)
 [![documentation](https://img.shields.io/badge/docs-mkdocs-708FCC.svg?style=flat)](https://vandyG.github.io/eventbrite-cetd/)
 [![pypi version](https://img.shields.io/pypi/v/eventbrite-cetd.svg)](https://pypi.org/project/eventbrite-cetd/)
 [![gitter](https://badges.gitter.im/join%20chat.svg)](https://app.gitter.im/#/room/#eventbrite-cetd:gitter.im)
