@@ -46,6 +46,11 @@ jobs:
     - name: Check if the documentation builds correctly
       run: make check-docs
 
+    - name: Make scripts executable if they have shebangs
+    run: |
+      find . -name '*.py' -exec grep -Il '^#!' {} \; | xargs chmod +x
+
+
     - name: Check the code quality
       run: make check-quality
 
