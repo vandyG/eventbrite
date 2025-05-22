@@ -31,25 +31,26 @@ def version_callback(value: bool) -> None:  # noqa: FBT001
         rich_console.print(f"eventbrite-cetd version: {debug._get_version()}")
         raise typer.Exit
 
-
-@app.callback()
-def common(
-    version: bool = typer.Option(None, "-V", "--version", callback=version_callback, help="Show version and exit."),  # noqa: ARG001, FBT001
-    debug_info: bool = typer.Option(None, "--debug-info", help="Show debug information and exit."),  # noqa: FBT001
-) -> None:
-    """Common callback to handle global options.
-
-    Args:
-        version (bool): Show the application's version.
-        debug_info (bool): Show debug information.
-    """
-    if debug_info:
+def debug_callback(value: bool) -> None:  # noqa: FBT001
+    if value:
         debug._print_debug_info()
         raise typer.Exit
 
 
+@app.callback()
+def common(
+    version: bool = typer.Option(None, "-V", "--version", callback=version_callback, help="Show version and exit."),  # noqa: FBT001
+    debug_info: bool = typer.Option(None, "-D", "--debug-info", callback=debug_callback, help="Show debug information and exit."),  # noqa: FBT001
+) -> None:
+    """CLI interface for the Eventbrite Attendee Exporter.
+
+    Command-line interface for the Eventbrite Attendee Exporter,
+    allowing users to fetch attendee data for their organizations and export it to a CSV file.
+    """
+
+
 @app.command()
-def run(
+def generate(
     output_file: str = typer.Option("data/attendees.csv", help="Path to the output CSV file."),
 ) -> None:
     """Fetch and export Eventbrite attendee data.

@@ -44,7 +44,7 @@ Gitter = "https://gitter.im/eventbrite-cetd/community"
 Funding = "https://github.com/sponsors/vandyG"
 
 [project.scripts]
-eventbrite-cetd = "eventbrite_cetd._internal.cli:app"
+cetd = "eventbrite_cetd._internal.cli:app"
 
 [tool.pdm.version]
 source = "call"
