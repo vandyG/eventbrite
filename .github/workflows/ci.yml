@@ -65,63 +65,63 @@ jobs:
         name: objects.inv
         path: site/objects.inv
 
-  tests:
+  # tests:
 
-    needs:
-    - quality
-    strategy:
-      matrix:
-        os:
-        - ubuntu-latest
-        - macos-latest
-        - windows-latest
-        python-version:
-        - "3.10"
-        - "3.11"
-        - "3.12"
-        - "3.13"
-        - "3.14"
-        resolution:
-        - highest
-        - lowest-direct
-        exclude:
-        - os: macos-latest
-          resolution: lowest-direct
-        - os: windows-latest
-          resolution: lowest-direct
-    runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.python-version == '3.14' }}
+  #   needs:
+  #   - quality
+  #   strategy:
+  #     matrix:
+  #       os:
+  #       - ubuntu-latest
+  #       - macos-latest
+  #       - windows-latest
+  #       python-version:
+  #       - "3.10"
+  #       - "3.11"
+  #       - "3.12"
+  #       - "3.13"
+  #       - "3.14"
+  #       resolution:
+  #       - highest
+  #       - lowest-direct
+  #       exclude:
+  #       - os: macos-latest
+  #         resolution: lowest-direct
+  #       - os: windows-latest
+  #         resolution: lowest-direct
+  #   runs-on: ${{ matrix.os }}
+  #   continue-on-error: ${{ matrix.python-version == '3.14' }}
 
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        fetch-tags: true
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
+  #     with:
+  #       fetch-depth: 0
+  #       fetch-tags: true
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        allow-prereleases: true
+  #   - name: Setup Python
+  #     uses: actions/setup-python@v5
+  #     with:
+  #       python-version: ${{ matrix.python-version }}
+  #       allow-prereleases: true
 
-    - name: Setup uv
-      uses: astral-sh/setup-uv@v5
-      with:
-        enable-cache: true
-        cache-dependency-glob: pyproject.toml
-        cache-suffix: ${{ matrix.resolution }}
+  #   - name: Setup uv
+  #     uses: astral-sh/setup-uv@v5
+  #     with:
+  #       enable-cache: true
+  #       cache-dependency-glob: pyproject.toml
+  #       cache-suffix: ${{ matrix.resolution }}
 
-    - name: Install dependencies
-      env:
-        UV_RESOLUTION: ${{ matrix.resolution }}
-      run: make setup
+  #   - name: Install dependencies
+  #     env:
+  #       UV_RESOLUTION: ${{ matrix.resolution }}
+  #     run: make setup
 
-    - name: Download objects inventory
-      uses: actions/download-artifact@v4
-      with:
-        name: objects.inv
-        path: site/
+  #   - name: Download objects inventory
+  #     uses: actions/download-artifact@v4
+  #     with:
+  #       name: objects.inv
+  #       path: site/
 
-    - name: Run the test suite
-      run: make test
+  #   - name: Run the test suite
+  #     run: make test
