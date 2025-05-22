@@ -1,6 +1,7 @@
-import os
-import csv
 import asyncio
+import csv
+import os
+
 import aiohttp
 
 OAUTH_TOKEN = os.environ["PRIVATE_TOKEN"]
@@ -30,7 +31,8 @@ async def get_my_organizations(session):
         organizations.extend(data["organizations"])
 
         continuation = data["pagination"].get("continuation")
-        if not continuation:
+        has_more_items = data["pagination"].get("has_more_items")
+        if not has_more_items:
             break
 
     return organizations
@@ -38,7 +40,7 @@ async def get_my_organizations(session):
 
 async def fetch_attendees_page(session, url):
     data = await fetch(session, url)
-    return data.get("attendees", []), data["pagination"].get("continuation")
+    return data.get("attendees", []), data["pagination"].get("continuation"), data["pagination"].get("has_more_items")
 
 
 async def get_attendees_by_org(session, organization_id):
@@ -50,38 +52,38 @@ async def get_attendees_by_org(session, organization_id):
         if continuation:
             url += f"&continuation={continuation}"
 
-        page_attendees, continuation = await fetch_attendees_page(session, url)
+        page_attendees, continuation, has_more_items = await fetch_attendees_page(session, url)
         attendees.extend(page_attendees)
 
-        if not continuation:
+        if not has_more_items:
             break
 
     return attendees
 
 
-def export_attendees_to_csv(attendees, output_file='attendees.csv'):
-    headers = ['organization_id', 'event_id', 'event_name', 'event_start', 'checked_in',
-               'attendee_name', 'email', 'age', 'gender', 'cell_phone']
+def export_attendees_to_csv(attendees, output_file="attendees.csv"):
+    headers = ["organization_id", "event_id", "event_name", "event_start", "checked_in",
+               "attendee_name", "email", "age", "gender", "cell_phone"]
 
-    with open(output_file, mode='w', newline='', encoding='utf-8') as file:
+    with open(output_file, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(headers)
 
         for attendee in attendees:
-            event = attendee.get('event', {})
-            profile = attendee.get('profile', {})
+            event = attendee.get("event", {})
+            profile = attendee.get("profile", {})
 
             row = [
-                event.get('organization_id', ''),
-                attendee.get('event_id', ''),
-                event.get('name', {}).get('text', ''),
-                event.get('start', {}).get('utc', ''),
-                attendee.get('checked_in', False),
-                profile.get('name', ''),
-                profile.get('email', ''),
-                profile.get('age', ''),
-                profile.get('gender', ''),
-                profile.get('cell_phone', ''),
+                event.get("organization_id", ""),
+                attendee.get("event_id", ""),
+                event.get("name", {}).get("text", ""),
+                event.get("start", {}).get("utc", ""),
+                attendee.get("checked_in", False),
+                profile.get("name", ""),
+                profile.get("email", ""),
+                profile.get("age", ""),
+                profile.get("gender", ""),
+                profile.get("cell_phone", ""),
             ]
             writer.writerow(row)
 
