@@ -1,0 +1,43 @@
+name: Export Eventbrite Attendees
+
+on:
+  workflow_dispatch: # Allows manual triggering from the GitHub UI
+  push:
+    branches:
+      - master # Triggers on pushes to the main branch
+
+jobs:
+  export_data:
+    runs-on: ubuntu-latest # Specifies the operating system for the job
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Action to check out your repository code
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12' # Specify the Python version to use
+      
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: pyproject.toml
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
+
+      - name: Run tests
+        env:
+          # Set the Eventbrite API token as an environment variable.
+          # This assumes you have added a repository secret named 'EVENTBRITE_PRIVATE_TOKEN'.
+          PRIVATE_TOKEN: ${{ secrets.EVENTBRITE_PRIVATE_TOKEN }}
+        run: uv run eventbrite-cetd run --output-file data/attendees.csv
+
+      - name: Upload attendee data as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: eventbrite-attendees-csv
+          path: data/attendees.csv # Path to the generated CSV file
+          if-no-files-found: error # Fail the workflow if the file is not found
