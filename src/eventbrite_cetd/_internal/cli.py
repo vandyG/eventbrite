@@ -1,96 +1,78 @@
-# Why does this file exist, and why not put this in `__main__`?
-#
-# You might be tempted to import things from `__main__` later,
-# but that will cause problems: the code will get executed twice:
-#
-# - When you run `python -m eventbrite_cetd` python will execute
-#   `__main__.py` as a script. That means there won't be any
-#   `eventbrite_cetd.__main__` in `sys.modules`.
-# - When you import `__main__` it will get executed again (as a module) because
-#   there's no `eventbrite_cetd.__main__` in `sys.modules`.
+"""CLI interface for the Eventbrite Attendee Exporter.
 
-from __future__ import annotations
+This module provides a command-line interface for the Eventbrite Attendee Exporter,
+allowing users to fetch attendee data for their organizations and export it to a CSV file.
+"""
 
-import argparse
-import sys
-from typing import Any
+import asyncio
+import logging
 
 import typer
+from rich import console
+from rich.logging import RichHandler
 
 from eventbrite_cetd._internal import debug
-from eventbrite_cetd.eventbrite import get_my_organizations
-
-
-class _DebugInfo(argparse.Action):
-    def __init__(self, nargs: int | str | None = 0, **kwargs: Any) -> None:
-        super().__init__(nargs=nargs, **kwargs)
-
-    def __call__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ARG002
-        debug._print_debug_info()
-        sys.exit(0)
-
-
-def get_parser() -> argparse.ArgumentParser:
-    """Return the CLI argument parser.
-
-    Returns:
-        An argparse parser.
-    """
-    parser = argparse.ArgumentParser(prog="eventbrite-cetd")
-    parser.add_argument("-V", "--version", action="version", version=f"%(prog)s {debug._get_version()}")
-    parser.add_argument("--debug-info", action=_DebugInfo, help="Print debug information.")
-    parser.add_argument(
-        "-o",
-        "--organization",
-        action=_DebugInfo,
-        help="Organization to fetch events for.",
-        type=int,
-        default=0,
-    )
-    return parser
-
-
-def main(organizaiton: int = 0, debug_info: ) -> int:
-    """Run the main program.
-
-    This function is executed when you type `eventbrite-cetd` or `python -m eventbrite_cetd`.
-
-    Parameters:
-        args: Arguments passed from the command line.
-
-    Returns:
-        An exit code.
-    """
-    parser = get_parser()
-    opts = parser.parse_args(args=args)
-    if not opts.organization:
-        organizations = get_my_organizations()
-
-        if not organizations:
-            print("No organizations found.")
-            return 1
-
-        print("Select an organization:")
-        for i, org in enumerate(organizations, 1):
-            print(f"{i}: {org['name']} (ID: {org['id']})")
-
-        while True:
-            try:
-                selection = int(input("Enter the number of the organization: "))
-                if 1 <= selection <= len(organizations):
-                    selected_org_id = organizations[selection - 1]["id"]
-                    break
-                print("Invalid selection. Try again.")
-            except ValueError:
-                print("Please enter a valid number.")
-
-        print(f"Selected organization ID: {selected_org_id}")
-        # Use selected_org_id as needed
-    else:
-        selected_org_id = opts.organization
-        print(f"Organization ID provided via CLI: {selected_org_id}")
-    return 0
-
+from eventbrite_cetd._internal.eventbrite import main  # Import the main function from eventbrite.py
 
 app = typer.Typer()
-app.command()(main)
+rich_console = console.Console()
+
+
+def version_callback(value: bool) -> None:  # noqa: FBT001
+    """Callback function to handle the --version flag.
+
+    Args:
+        value (bool): Boolean indicating if the version flag is present.
+
+    Raises:
+        typer.Exit: Exits the application after printing the version.
+    """
+    if value:
+        rich_console.print(f"eventbrite-cetd version: {debug._get_version()}")
+        raise typer.Exit
+
+
+@app.callback()
+def common(
+    version: bool = typer.Option(None, "-V", "--version", callback=version_callback, help="Show version and exit."),  # noqa: ARG001, FBT001
+    debug_info: bool = typer.Option(None, "--debug-info", help="Show debug information and exit."),  # noqa: FBT001
+) -> None:
+    """Common callback to handle global options.
+
+    Args:
+        version (bool): Show the application's version.
+        debug_info (bool): Show debug information.
+    """
+    if debug_info:
+        debug._print_debug_info()
+        raise typer.Exit
+
+
+@app.command()
+def run(
+    output_file: str = typer.Option("data/attendees.csv", help="Path to the output CSV file."),
+) -> None:
+    """Fetch and export Eventbrite attendee data.
+
+    Args:
+        output_file (str, optional): Path to the output CSV file. Defaults to "data/attendees.csv".
+    """
+    # Configure logging with rich
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+        datefmt="[%X]",
+        handlers=[RichHandler(console=rich_console)],
+    )
+    logger = logging.getLogger("eventbrite-cetd")
+
+    try:
+        asyncio.run(main(logger, output_file))
+        rich_console.print("[bold green]Attendee data export completed successfully![/bold green]")
+    except Exception as e:
+        logger.exception("[bold red]An error occurred:[/bold red]")
+        raise typer.Exit(code=1) from e
+
+
+if __name__ == "__main__":
+    app()
