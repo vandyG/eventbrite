@@ -54,15 +54,17 @@ def setup() -> None:
     print("Installing dependencies (default environment)")
     default_venv = Path(".venv")
     if not default_venv.exists():
-        shell("uv venv")
+        default_python = shell("uv python find", capture_output=True)
+        shell(f"uv venv --python {default_python}")
     uv_install(default_venv)
 
     if PYTHON_VERSIONS:
         for version in PYTHON_VERSIONS:
+            python_version = os.getenv(f"PYTHON{version.replace('.','')}", version)
             print(f"\nInstalling dependencies (python{version})")
             venv_path = Path(f".venvs/{version}")
             if not venv_path.exists():
-                shell(f"uv venv --python {version} {venv_path}")
+                shell(f"uv venv --python {python_version} {venv_path}")
             with environ(UV_PROJECT_ENVIRONMENT=str(venv_path.resolve())):
                 uv_install(venv_path)
 
