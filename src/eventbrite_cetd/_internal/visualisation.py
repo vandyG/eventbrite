@@ -13,7 +13,7 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from rich import print
+from rich import print  # noqa: A004
 
 
 def load_data(file_path: Path, logger: Optional[logging.Logger] = None) -> pd.DataFrame:
