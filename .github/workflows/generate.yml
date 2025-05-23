@@ -33,11 +33,18 @@ jobs:
           # Set the Eventbrite API token as an environment variable.
           # This assumes you have added a repository secret named 'EVENTBRITE_PRIVATE_TOKEN'.
           PRIVATE_TOKEN: ${{ secrets.EVENTBRITE_PRIVATE_TOKEN }}
-        run: uv run cetd run --output-file data/attendees.csv
+        run: uv run cetd generate --output-file data/attendees.csv
+      
+      - name: Generate Viz.
+        env:
+          # Set the Eventbrite API token as an environment variable.
+          # This assumes you have added a repository secret named 'EVENTBRITE_PRIVATE_TOKEN'.
+          PRIVATE_TOKEN: ${{ secrets.EVENTBRITE_PRIVATE_TOKEN }}
+        run: uv run cetd visualize --input-file data/attendees.csv
 
       - name: Upload attendee data as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: eventbrite-attendees-csv
-          path: data/attendees.csv # Path to the generated CSV file
+          name: eventbrite-attendees-data
+          path: data/
           if-no-files-found: error # Fail the workflow if the file is not found
