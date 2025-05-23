@@ -7,7 +7,7 @@ let
 
   inherit (stablePkgs) lib;
 
-  # libraryPath = with stablePkgs; lib.makeLibraryPath [ stdenv.cc.cc.lib ];
+  libraryPath = with stablePkgs; lib.makeLibraryPath [ stdenv.cc.cc.lib ];
 
   pyproject-nix =
     import
@@ -58,10 +58,10 @@ stablePkgs.mkShell {
     nixfmt-rfc-style
   ];
 
-  # export LD_LIBRARY_PATH=${libraryPath}:$LD_LIBRARY_PATHx
 
   shellHook = ''
     export TMPDIR=/tmp
+    export LD_LIBRARY_PATH=${libraryPath}:$LD_LIBRARY_PATHx
     export RUFF_PATH=$(which ruff)
     export PYTHON311=$(which python3.11)
     export PYTHON312=$(which python3.12)
