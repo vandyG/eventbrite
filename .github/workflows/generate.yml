@@ -2,9 +2,6 @@ name: Export Eventbrite Attendees
 
 on:
   workflow_dispatch: # Allows manual triggering from the GitHub UI
-  push:
-    branches:
-      - master # Triggers on pushes to the main branch
 
 jobs:
   export_data:
