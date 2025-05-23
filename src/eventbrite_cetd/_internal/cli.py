@@ -7,7 +7,7 @@ allowing users to fetch attendee data for their organizations and export it to a
 import asyncio
 import logging
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from rich import console
@@ -84,7 +84,7 @@ def generate(
 @app.command()
 def visualize(
     input_file: Annotated[
-        Optional[Path],
+        Path,
         typer.Option(
             help="Path to the input CSV file for visualization.",
             file_okay=True,
@@ -94,7 +94,7 @@ def visualize(
         ),
     ] = Path("./data/attendees.csv"),
     output_dir: Annotated[
-        Optional[Path],
+        Path,
         typer.Option(
             help="Directory to save the generated visualizations.",
             file_okay=False,
